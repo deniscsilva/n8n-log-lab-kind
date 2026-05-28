@@ -1,0 +1,63 @@
+ Plano de teste dos workflows
+
+  Acesse o n8n 
+
+  http://localhost:5678 → crie o usuário admin no primeiro acesso
+  
+  ---
+  Workflow 1 — Log simples (sucesso)
+  
+  Crie um workflow com 2 nodes:
+
+  [Manual Trigger] → [Code node]
+
+  No Code node, cole: 
+  console.log("TEST_FLOW_START: workflow de teste executando");
+  return items;
+  
+  Execute manualmente. Isso força o worker a logar no stdout.
+
+  ---
+  Workflow 2 — Log de erro (para simular o errorTrigger)
+
+  Crie um segundo workflow:
+  [Manual Trigger] → [Code node com erro]
+
+  No Code node:
+  throw new Error("TEST_ERROR: erro simulado para validar captura no ES");
+
+  ---
+  Workflow 3 — Loop de execuções (volume)
+ 
+  Para simular o volume do all-logs-workflow:
+  [Schedule Trigger: a cada 1 min] → [Code node]
+  
+  console.log(`TEST_LOOP: execução ${new Date().toISOString()}`);
+  return items;
+
+  ---
+  Validação no ES após executar
+
+  Depois de rodar os workflows, executar:
+
+  # Ver logs dos workers com "TEST_"
+  curl -s "http://localhost:9200/legacy-*/_search?pretty&size=5" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "query": {"match": {"application.message": "TEST_"}},
+      "_source": ["application.message", "application.level", "kubernetes.pod_name", "@timestamp"]
+    }'
+  
+  E para ver o volume agregado por pod (simulando o que o Kibana mostraria):
+  curl -s "http://localhost:9200/legacy-*/_search?pretty&size=0" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "aggs": {
+        "por_pod": {
+          "terms": {"field": "kubernetes.pod_name.keyword"}
+        }
+      }
+    }'
+
+  ---
+  Crie os três workflows, execute e me avise — vou fazer a query no ES e confirmar que os logs de execução chegaram com a estrutura correta.

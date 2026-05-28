@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: n8n-configmap
+  namespace: hub
+data:
+  # --- Banco de dados (PostgreSQL local) ---
+  DB_TYPE: postgresdb
+  DB_POSTGRESDB_HOST: postgres-service
+  DB_POSTGRESDB_PORT: "5432"
+  DB_POSTGRESDB_DATABASE: n8n
+  DB_POSTGRESDB_SSL_ENABLED: "false"     # sem SSL no lab (produção usa true via Azure)
+
+  # --- Execuções (idêntico à produção) ---
+  EXECUTIONS_MODE: queue
+  EXECUTIONS_DATA_PRUNE: "true"
+  EXECUTIONS_DATA_MAX_AGE: "4380"
+  EXECUTIONS_DATA_SAVE_ON_ERROR: all
+  EXECUTIONS_DATA_SAVE_ON_SUCCESS: all
+  EXECUTIONS_DATA_SAVE_ON_PROGRESS: "true"
+  EXECUTIONS_DATA_SAVE_MANUAL_EXECUTIONS: "false"
+  EXECUTIONS_TIMEOUT: "3600"
+  EXECUTIONS_TIMEOUT_MAX: "3600"
+
+  # --- Fila / Redis (local, sem TLS) ---
+  QUEUE_BULL_REDIS_HOST: redis-service
+  QUEUE_BULL_REDIS_PORT: "6379"
+  QUEUE_BULL_REDIS_TLS: "false"          # produção usa true (Azure Cache)
+  QUEUE_MODE: "true"
+  QUEUE_MODE_REDIS_OPTIONS: '{"keepAlive":1,"enableOfflineQueue":true,"lazyConnect":false}'
+  QUEUE_MODE_REDIS_RETRY_STRATEGY: linear
+  QUEUE_MODE_REDIS_TIMEOUT: "10000"
+
+  # --- N8N host (lab local) ---
+  N8N_HOST: localhost
+  N8N_PROTOCOL: http                     # produção usa https
+  WEBHOOK_URL: http://localhost:5678/    # produção usa https + domínio real
+  GENERIC_TIMEZONE: America/Sao_Paulo
+
+  # --- Workers ---
+  N8N_CONCURRENCY_PRODUCTION_LIMIT: "20"
+  OFFLOAD_MANUAL_EXECUTIONS_TO_WORKERS: "true"
+
+  # --- Logs e runtime ---
+  N8N_LOG_LEVEL: debug
+  N8N_LOG_OUTPUT: console
+  N8N_RUNNERS_ENABLED: "true"
+  N8N_DEFAULT_BINARY_DATA_MODE: filesystem
+  N8N_GIT_NODE_DISABLE_BARE_REPOS: "false"
+  CODE_ENABLE_STDOUT: "true"
+  NODE_OPTIONS: --max-old-space-size=4096
