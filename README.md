@@ -38,9 +38,7 @@ Lab local para simular o ambiente n8n de produção (namespace `hub`) com pipeli
 |---------------|---------------|-----------------------|
 | n8n           | localhost:5678 | NodePort 30678       |
 | Elasticsearch | localhost:9200 | NodePort 30920       |
-| Kibana        | localhost:5601 | port-forward (ver nota abaixo) |
-
-> **Kibana:** a porta 5601 foi adicionada ao `kind-config.yml` para o próximo cluster. Enquanto isso, use `kubectl port-forward -n logging svc/kibana 5601:5601`.
+| Kibana        | localhost:5601 | ModePort 30601       |
 
 ---
 
